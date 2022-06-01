@@ -3,8 +3,7 @@ Python: 3.8.6
 
 # 必要事項
 - requirement.txtに記載のライブラリをpip installする
-- 環境変数を通す(下記の2つ)
-    "PYTHONPATH": "${workspaceFolder}/lib",
+- 環境変数PYTHONPATHにlibディレクトリを追加する
 - resourceディレクトリのtmp.ymlと、tasksディレクトリの試験ファイルを参考に試験用パラメータを作成する
 
 # 実行方法
