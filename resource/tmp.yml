@@ -1,0 +1,54 @@
+# OROTI(CLI)の接続情報
+oroti:
+  ip: 
+  cli_username: 
+  cli_password: 
+  gui_username: 
+  gui_password: 
+
+# NCSの接続情報
+ncs:
+  ip: 
+  username: 
+  password: 
+  installer_dir: 
+
+# SSHポートフォワードで使用するポート番号
+localhost_port: 
+
+# SCPサーバー情報
+scp_server:
+  host: 
+  username: 
+  password: 
+  vrf: 
+  dir: 
+
+# 事前ログ
+before_log:
+  [
+    
+  ]
+
+# 事後ログ
+after_log:
+  [
+    
+  ]
+
+# 更新するOSとSNU情報
+packages:
+  ncs560:
+    filename:
+      [
+        
+      ]
+    inactive:
+      exec:
+        [
+          
+        ]
+      admin:
+        [
+          
+        ]

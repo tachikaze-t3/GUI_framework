@@ -1,0 +1,25 @@
+# resouceファイル
+resouce.yaml
+
+# chromedriver
+chromedriver.exe
+ST-00_OROTI_GUI.robot
+
+# logファイル
+*.html
+*.xml
+
+# 仮想環境
+.venv/
+
+# vscode設定
+.vscode/
+
+# 開発用ファイル
+python_test.py
+
+# pythonキャッシュ
+__pycache__/
+
+# TextFSM
+TextFSM/
