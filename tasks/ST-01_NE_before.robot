@@ -12,6 +12,7 @@ YAMLで設定が必要なパラメータ
     ${ncs}[ip]                              :ncsにssh接続する際のIPアドレス
     ${ncs}[username]                        :ncsにssh接続する際のユーザー名
     ${ncs}[password]                        :ncsにssh接続する際のパスワード
+    ${ncs}[hostname]                        :ncsのhostname
     ${ncs}[installer_dir]                   :scpダウンロードを行う際の保存先ディレクトリ
     ${ncs}[platform]                        :show platformで出力されるNodeとStateの組み合わせ
     ${before_log}                           :事前ログで取得するコマンド
