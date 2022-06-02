@@ -1,4 +1,3 @@
-from audioop import add
 import time
 from robot.api import logger
 from robot.api.deco import library, keyword, not_keyword
@@ -8,27 +7,27 @@ from sshtunnel import SSHTunnelForwarder
 @library(scope='SUITE')
 class SshDriver():
     """
-    SshDriverは、OROTIを踏み台としてNCS560/5504へSSH接続経由で操作を行うRobot Frameworkライブラリです。
+    SshDriverは、OROTI/SSMを踏み台としてNCS560/5504へSSH接続経由で操作を行うRobot Frameworkライブラリです。
     このライブラリはnetmikoを利用しています。
     """
     
     @keyword
-    def create_tunnel(self, oroti_ip:str, oroti_username:str, oroti_password:str, ncs_ip:str, localhost_port):
+    def create_tunnel(self, step_ip:str, step_username:str, step_password:str, ncs_ip:str, localhost_port):
         """
-        create_tunnelは、OROTIを経由してNCSへ接続を行うためのSSHポートフォーワードを行います
-        OROTIの情報はyamlを参照します
+        create_tunnelは、OROTI/SSMを経由してNCSへ接続を行うためのSSHポートフォーワードを行います
+        OROTI/SSMの情報はyamlを参照します
 
         Args:
-            oroti_ip (str): OROTIのIPアドレス
-            oroti_username (str): OROTIへSSH接続する際のusername
-            oroti_password (str): ORPTIへSSH接続する際のpassword
+            step_ip (str): OROTI/SSMのIPアドレス
+            step_username (str): OROTI/SSMへSSH接続する際のusername
+            step_password (str): OROTI/SSMへSSH接続する際のpassword
             ncs_ip (str): NCSのIPアドレス
             localhost_port (str): SSHポートフォワードをする際のポート番号
         """
         self.server = SSHTunnelForwarder(
-            (oroti_ip, 22),
-            ssh_username= oroti_username,
-            ssh_password= oroti_password,
+            (step_ip, 22),
+            ssh_username= step_username,
+            ssh_password= step_password,
             remote_bind_address= (ncs_ip, 22),
             local_bind_address= ('0.0.0.0', localhost_port)
         )
@@ -38,7 +37,7 @@ class SshDriver():
     @keyword
     def delete_tunnel(self):
         """
-        delete_tunnelは、OROTI経由のSSHポートフォワードを終了します
+        delete_tunnelは、OROTI/SSM経由のSSHポートフォワードを終了します
         """
         self.server.close()
     
@@ -119,7 +118,10 @@ class SshDriver():
             split = line.split()
             if module.get('total') != None:
                 if split[1] == 'kbytes' and split[2] =='total':
-                    module['files'] = files
+                    store = []
+                    for file in files:
+                        store.append(file.split()[-1])
+                    module['files'] = store
                     module['amount'] = line
                     output.append(module)
                     files = []
@@ -350,7 +352,7 @@ class SshDriver():
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
         output = self.channnel_command(f'delete {filename} location {location}', wait_time)
-        if '[y|n][y] ?' in output:
+        if '[confirm]' in output:
             lines = self.channnel_command('y', wait_time)
             output = output + lines
         logger.write(output, level='INFO')
@@ -372,13 +374,17 @@ class SshDriver():
         """
         output = ''
         if vrf != '':
-            output = self.connection.send_command(
-                f'scp {username}@{host}:{remote_filename} vrf {vrf} {local_filename}', expect_string="Password:")
+            logger.write(f'scp {username}@{host}:{remote_filename} vrf {vrf} {local_filename}', level='INFO')
+            ouptut = self.channnel_command(
+                f'scp {username}@{host}:{remote_filename} vrf {vrf} {local_filename}', 5)
+            # output = self.connection.send_command(
+            #     f'scp {username}@{host}:{remote_filename} {local_filename}', expect_string='Password:')
         else:
-            output = self.connection.send_command(
-                f'scp {username}@{host}:{remote_filename} {local_filename}', expect_string="Password:")
-        lines = self.connection.send_command_timing(password, read_timeout=wait_time)
-        output = output + lines
+            output = self.channnel_command(
+                f'scp {username}@{host}:{remote_filename} {local_filename}', 5)
+        #     output = self.connection.send_command(
+        #         f'scp {username}@{host}:{remote_filename} {local_filename}', expect_string='Password:')
+        output = output + self.connection.send_command_timing(password, read_timeout=wait_time)
         logger.write(output, level='INFO')
 
     @keyword
@@ -426,7 +432,7 @@ class SshDriver():
         logger.write(output, level='INFO')
 
     @keyword
-    def install_add(self, location: str, packages: list, wait_time=3600):
+    def install_add(self, location: str, packages: list, wait_time=3600) -> str:
         """
         install_addは、引数のパッケージを指定してinstall addコマンドを実行します
 
@@ -434,10 +440,20 @@ class SshDriver():
             location (str): パッケージの保存場所
             packages (list): パッケージ名
             wait_time (int, optional): 処理の待ち時間を指定します。デフォルトは3600秒
+
+        Raises:
+            AssertionError: 実行終了時に、successfullyの表示がない場合に表示
+
+        Returns:
+            str: 実行id
         """
         packages_str = ' '.join(packages)
-        output = self.connection.send_command(f'install add source {location} {packages_str} synchronous', read_timeout=wait_time)
-        logger.write(output, level='INFO')
+        lines = self.connection.send_command(f'install add source {location} {packages_str} synchronous', read_timeout=wait_time)
+        logger.write(lines, level='INFO')
+        line = lines.splitlines()[-2]
+        if line.split()[-1] != 'successfully':
+            raise AssertionError('install addコマンドに失敗しました。')
+        return line.split()[-3]
 
     @keyword
     def show_install_inactive(self, wait_time=60) -> list:
@@ -463,6 +479,26 @@ class SshDriver():
                     output.append(line.lstrip(' '))
         return output
     
+    @keyword
+    def platform_should_be_equal(self, output: list, anser:dict):
+        """
+        platform_should_be_equalは、show platformの出力から想定通りのモジュールが想定通りの状態であることを確認します
+
+        Args:
+            output (list): show platformの出力結果
+            anser (dict): モジュール名と状態の情報
+
+        Raises:
+            AssertionError: 想定されたHW構成と異なる場合に表示します
+        """
+        if len(anser) != len(output):
+            raise AssertionError('HW構成が想定と違います。') 
+        for module in output:
+            if module['Node'] not in anser:
+                raise AssertionError('HW構成が想定と違います。') 
+            if module['State'] != anser[module['Node']]:
+                raise AssertionError('HW構成が想定と違います。') 
+
     @keyword
     def admin_show_install_inactive(self, wait_time=60) -> list:
         """
@@ -490,17 +526,22 @@ class SshDriver():
         return output
 
     @keyword
-    def install_prepare(self, packages: list, wait_time=3600):
+    def install_prepare(self, install_id: str, wait_time=3600):
         """
         install_prepareは、引数のパッケージについてinstall prepareを実施するコマンドです
 
         Args:
-            packages (list): パッケージ名
+            install_id (str): 実行id
             wait_time (int, optional): 処理の待ち時間を指定します。デフォルトは3600秒
+        
+        Raises:
+            AssertionError: 実行終了時に、successfullyの表示がない場合に表示
         """
-        packages_str = ' '.join(packages)
-        output = self.connection.send_command(f'install prepare {packages_str}  synchronous', read_timeout=wait_time)
-        logger.write(output, level='INFO')
+        lines = self.connection.send_command(f'install prepare id {install_id}  synchronous', read_timeout=wait_time)
+        logger.write(lines, level='INFO')
+        line = lines.splitlines()[-2]
+        if line.split()[-1] != 'successfully':
+            raise AssertionError('install prepareコマンドに失敗しました。')
 
     @keyword
     def show_install_prepare(self) -> list:
@@ -550,3 +591,41 @@ class SshDriver():
             }
             output.append(state)
         return  output
+
+    @keyword
+    def show_md5(self, location: str, filename: str) -> str:
+        """
+        show_md5は、show_md5コマンドにより指定したファイルのチェックサムを確認します
+
+        Args:
+            location (str): ファイルが存在するディレクトリ
+            filename (str): ファイル名
+
+        Returns:
+            str: チェックサム
+        """
+        lines = self.connection.send_command(f'show md5 file /{location}:/{filename}')
+        logger.write(lines, level='INFO')
+        return lines.splitlines()[-1]
+
+    @keyword
+    def list_containts_should_be_equal(self, list_x: list, list_y: list):
+        """
+        list_containts_should_be_equalは、入力された2つのlistの要素が同一かどうかを確認します。(要素は順不同)
+
+        Args:
+            list_x (list): 比較するlist
+            list_y (list): 比較するlist
+
+        Raises:
+            AttributeError: 2つのlistの要素が同一出ない場合に表示
+        """
+        if len(list_x) != len(list_y):
+            raise AttributeError('2つのlistは同一ではありません。')
+        for contain_x in list_x:
+            flag = False
+            for contain_y in list_y:
+                if contain_x == contain_y:
+                    flag = True
+            if flag == False:
+                raise AttributeError('2つのlistは同一ではありません。')

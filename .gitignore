@@ -23,3 +23,6 @@ __pycache__/
 
 # TextFSM
 TextFSM/
+
+# libdoc
+!libdoc.html
