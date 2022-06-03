@@ -1,14 +1,14 @@
 #  OROTI/SSM(CLI)の接続情報
 step_server:
-  ip: '131.220.240.30'
-  cli_username: 'neops'
-  cli_password: 'neops01'
+  ip: '131.220.240.7'
+  cli_username: 'admin'
+  cli_password: 'CiscoAdmin12345!'
 
 # NCSの接続情報
 ncs:
-  ip: '10.1.254.215'
-  username: 'OROTI'
-  password: 'OROTI'
+  ip: '170.216.16.33'
+  username: 'docomo'
+  password: 'docomo'
   hostname: '00_OROTI_ACR'
   installer_dir: '/misc/disk1/'
   platform:
@@ -34,8 +34,8 @@ scp_server:
   host: '129.220.0.8'
   username: 'neops'
   password: 'neops01'
-  vrf: 'docomo-dcn-outofband'
-  dir: '/var/tmp/'
+  vrf: 'docomo-dcn-inband'
+  dir: '/home/admin/update_work'
 
 # 事前ログ
 before_log:
