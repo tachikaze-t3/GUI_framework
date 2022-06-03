@@ -1,109 +1,39 @@
-#  OROTI/SSM(CLI)の接続情報
-step_server:
-  ip: '131.220.240.7'
-  cli_username: 'admin'
-  cli_password: 'CiscoAdmin12345!'
+# OROTI(CLI)の接続情報
+oroti:
+  ip: 
+  cli_username: 
+  cli_password: 
+  gui_username: 
+  gui_password: 
 
 # NCSの接続情報
 ncs:
-  ip: '170.216.16.33'
-  username: 'docomo'
-  password: 'docomo'
-  hostname: '00_OROTI_ACR'
-  installer_dir: '/misc/disk1/'
-  platform:
-    0/0/CPU0: 'OPERATIONAL'
-    0/1/CPU0: 'OPERATIONAL'
-    0/2/CPU0: 'OPERATIONAL'
-    0/3/CPU0: 'OPERATIONAL'
-    0/4/CPU0: 'OPERATIONAL'
-    0/5/CPU0: 'OPERATIONAL'
-    0/RP0/CPU0: 'IOS XR RUN'
-    0/RP1/CPU0: 'IOS XR RUN'
-    0/FT0/CPU0: 'OPERATIONAL'
-    0/FT1/CPU0: 'OPERATIONAL'
-    0/FT2/CPU0: 'OPERATIONAL'
-    0/PM0/CPU0: 'OPERATIONAL'
-    0/PM1/CPU0: 'FAILED'
+  ip: 
+  username: 
+  password: 
+  installer_dir: 
 
 # SSHポートフォワードで使用するポート番号
-localhost_port: 10010
+localhost_port: 
 
 # SCPサーバー情報
 scp_server:
-  host: '129.220.0.8'
-  username: 'neops'
-  password: 'neops01'
-  vrf: 'docomo-dcn-inband'
-  dir: '/home/admin/update_work'
+  host: 
+  username: 
+  password: 
+  vrf: 
+  dir: 
 
 # 事前ログ
 before_log:
   [
-    'show version',
-    'show install committed',
-    'show install active',
-    'show install superseded',
-    'show install inactive',
-    'show install log',
-    'admin show install committed',
-    'admin show install active',
-    'admin show install superseded',
-    'admin show install inactive',
-    'admin show install log',
-    'show platform',
-    'admin show platform',
-    'show inventory',
-    'admin show inventory',
-    'admin show diag',
-    'show hw-module fpd',
-    'admin show hw-module fpd',
-    'admin show environment all',
-    'admin show led',
-    'show run all',
-    'admin show run',
-    'cfs check',
-    'show redundancy',
-    'show interface brief',
-    'show interfaces',
-    'show logging',
-    'show license all'
+    
   ]
 
 # 事後ログ
 after_log:
   [
-    'show version',
-    'show install committed',
-    'show install active',
-    'show install superseded',
-    'show install inactive',
-    'show install log',
-    'admin show install committed',
-    'admin show install active',
-    'admin show install superseded',
-    'admin show install inactive',
-    'admin show install log',
-    'show platform',
-    'admin show platform',
-    'show inventory',
-    'admin show inventory',
-    'admin show diag',
-    'show hw-module fpd',
-    'admin show hw-module fpd',
-    'admin show environment all',
-    'admin show led',
-    'show run all',
-    'admin show run',
-    'cfs check',
-    'show redundancy',
-    'show interface brief',
-    'show interfaces',
-    'admin dir harddisk: location all',
-    'show media location all',
-    'admin show media location all',
-    'show logging',
-    'show license all'
+    
   ]
 
 # 更新するOSとSNU情報
@@ -111,75 +41,14 @@ packages:
   ncs560:
     filename:
       [
-        'NCS560-iosxr-k9-7.3.2.tar',
-        'ncs560-7.3.2.CSCwa54002.tar',
-        'ncs560-7.3.2.CSCwa54607.tar',
-        'ncs560-7.3.2.CSCwa52204.tar',
-        'ncs560-sysadmin-7.3.2.CSCwa52204.tar',
-        'ncs560-sysadmin-7.3.2.CSCvz77675.tar',
-        'ncs560-7.3.2.CSCvy46398.tar'
+        
       ]
     inactive:
       exec:
         [
-          'ncs560-os-3.0.0.1-r732.CSCwa52204',
-          'ncs560-mgbl-2.0.0.0-r732',
-          'ncs560-li-1.0.0.0-r732',
-          'ncs560-mini-x-7.3.2',
-          'ncs560-ospf-3.0.0.0-r732',
-          'ncs560-dpa-fwding-2.1.0.1-r732.CSCvy46398',
-          'ncs560-infra-3.0.0.1-r732.CSCvy46398',
-          'ncs560-k9sec-2.1.0.0-r732',
-          'ncs560-mpls-te-rsvp-2.0.0.0-r732',
-          'ncs560-iosxr-fwding-2.1.0.1-r732.CSCwa54002',
-          'ncs560-mpls-1.0.0.0-r732',
-          'ncs560-dpa-2.0.0.1-r732.CSCvy46398',
-          'ncs560-mcast-2.0.0.0-r732',
-          'ncs560-os-support-2.1.0.1-r732.CSCvy46398',
-          'ncs560-eigrp-1.0.0.0-r732',
-          'ncs560-infra-3.0.0.2-r732.CSCwa52204',
-          'ncs560-isis-2.0.0.0-r732',
-          'ncs560-xr-7.3.2',
-          'ncs560-dpa-fwding-2.1.0.4-r732.CSCwa54607',
-          # 'ncs560-dpa-fwding-2.0.0.2-r702.CSCvz20685'
+          
         ]
       admin:
         [
-          'ncs560-sysadmin-system-7.3.2.1-r732.CSCwa52204',
-          'ncs560-sysadmin-hostos-7.0.2-r702.admin',
-          'ncs560-mini-x-7.3.2',
-          'ncs560-sysadmin-ncs560-7.3.2.1-r732.CSCvz77675',
-          'ncs560-sysadmin-hostos-7.0.2-r702.host',
-          'ncs560-sysadmin-7.3.2'
+          
         ]
-    prepare:
-      [
-        'ncs560-sysadmin-system-7.3.2.1-r732.CSCwa52204',
-        'ncs560-sysadmin-ncs560-7.3.2.1-r732.CSCvz77675',
-        'ncs560-mpls-1.0.0.0-r732',
-        'ncs560-mpls-te-rsvp-2.0.0.0-r732',
-        'ncs560-isis-2.0.0.0-r732',
-        'ncs560-k9sec-2.1.0.0-r732',
-        'ncs560-mgbl-2.0.0.0-r732',
-        'ncs560-mcast-2.0.0.0-r732',
-        'ncs560-eigrp-1.0.0.0-r732',
-        'ncs560-ospf-3.0.0.0-r732',
-        'ncs560-li-1.0.0.0-r732',
-        'ncs560-iosxr-fwding-2.1.0.1-r732.CSCwa54002',
-        'ncs560-dpa-fwding-2.1.0.4-r732.CSCwa54607',
-        'ncs560-os-3.0.0.1-r732.CSCwa52204',
-        'ncs560-infra-3.0.0.2-r732.CSCwa52204',
-        'ncs560-dpa-2.0.0.1-r732.CSCvy46398',
-        'ncs560-os-support-2.1.0.1-r732.CSCvy46398',
-        'ncs560-mini-x-7.3.2'
-      ]
-
-# md5(packages:ncs{560/5504}:filenameに記載したファイルについて記載する)
-md5:
-  NCS560-iosxr-k9-7.3.2.tar: 'aff1317e5df0e11b74694e45652280c6'
-  ncs560-7.3.2.CSCwa54002.tar: '6d7fc55f244d28aee055d102fdd874c4'
-  ncs560-7.3.2.CSCwa54607.tar: 'b9febe7b1d2f4441d53da13cd0876353'
-  ncs560-7.3.2.CSCwa52204.tar: '8d50be82b522d76964e81477c4ecd962'
-  ncs560-sysadmin-7.3.2.CSCwa52204.tar: 'be55b14fb8867796ba2bae4f54943f64'
-  ncs560-sysadmin-7.3.2.CSCvz77675.tar: 'ad7f3f9636f05db7f3b5a22d5325b68e'
-  ncs560-7.3.2.CSCvy46398.tar: '84ba0fc1c8e60bd1baddb69b63722750'
