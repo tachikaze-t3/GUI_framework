@@ -57,7 +57,8 @@ class SshDriver():
             'ip': 'localhost',
             'username': ncs_username,
             'password': ncs_password,
-            'port': self.localhost_port
+            'port': self.localhost_port,
+            'session_log': 'netmiko_session.log'
         }
         self.connection = ConnectHandler(**device)
 
@@ -353,13 +354,13 @@ class SshDriver():
         """
         output = self.channnel_command(f'delete {filename} location {location}', wait_time)
         if '[confirm]' in output:
-            lines = self.channnel_command('y', wait_time)
+            lines = self.channnel_command('', wait_time)
             output = output + lines
         logger.write(output, level='INFO')
 
     @keyword
     def scp_download(self, local_filename: str, remote_filename: str, 
-                     host: str, username: str, password: str, vrf='', wait_time=300):
+                     host: str, username: str, password: str, vrf='', wait_time=1800):
         """
         scp_downloadは、scp通信によりファイルをダウンロードします
 
@@ -370,7 +371,7 @@ class SshDriver():
             username (str): scpサーバーのユーザー名
             password (str): scpサーバーのパスワード
             vrf (str, optional): VRF名、デフォルトは入力なし
-            wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで300秒
+            wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1800秒
         """
         output = ''
         if vrf != '':

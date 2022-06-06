@@ -26,3 +26,6 @@ TextFSM/
 
 # libdoc
 !libdoc.html
+
+# .logファイル
+*.log

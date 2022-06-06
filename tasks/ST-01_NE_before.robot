@@ -71,7 +71,9 @@ UT1-02
     File Delete        harddisk:*core*    0/RP0/CPU0
     File Delete        harddisk:*core*    0/RP1/CPU0
     ${admin_dir}       Admin Dir          harddisk:*core*    all
-    Should Be Empty    ${admin_dir}
+    FOR    ${node}    IN    @{admin_dir}
+        Should Be Empty    ${node}[files]
+    END
 
 UT1-03
     [Documentation]    showtechファイルの削除
@@ -81,7 +83,9 @@ UT1-03
     File Delete        harddisk:/showtech/*    0/RP0/CPU0
     File Delete        harddisk:/showtech/*    0/RP1/CPU0
     ${admin_dir}       Admin Dir               harddisk:/showtech    all
-    Should Be Empty    ${admin_dir}
+    FOR    ${node}    IN    @{admin_dir}
+        Should Be Empty    ${node}[files]
+    END
 
 UT1-04
     [Documentation]    hbmiss.tar.gzファイルの削除
@@ -91,7 +95,9 @@ UT1-04
     File Delete        harddisk:/*hbmiss*    0/RP0/CPU0
     File Delete        harddisk:/*hbmiss*    0/RP1/CPU0
     ${admin_dir}       Admin Dir             harddisk:/*hbmiss*    all
-    Should Be Empty    ${admin_dir}
+    FOR    ${node}    IN    @{admin_dir}
+        Should Be Empty    ${node}[files]
+    END
 
 UT1-05
     [Documentation]    kdumpファイルの削除
@@ -101,7 +107,9 @@ UT1-05
     File Delete        harddisk:/*kdump*    0/RP0/CPU0
     File Delete        harddisk:/*kdump*    0/RP1/CPU0
     ${admin_dir}       Admin Dir            harddisk:/*kdump*    all
-    Should Be Empty    ${admin_dir}
+    FOR    ${node}    IN    @{admin_dir}
+        Should Be Empty    ${node}[files]
+    END
 
 UT1-06
     [Documentation]    XR VM、Sysadmin VMのinactive packageの確認
