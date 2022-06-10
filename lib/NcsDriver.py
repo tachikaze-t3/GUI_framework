@@ -5,17 +5,16 @@ from netmiko import ConnectHandler
 from sshtunnel import SSHTunnelForwarder
 
 @library(scope='SUITE')
-class SshDriver():
+class NcsDriver():
     """
-    SshDriverは、OROTI/SSMを踏み台としてNCS560/5504へSSH接続経由で操作を行うRobot Frameworkライブラリです。
+    NcsDriverは、OROTI/SSMを踏み台としてNCS560/5504へSSH接続経由で操作を行うRobot Frameworkライブラリです。
     このライブラリはnetmikoを利用しています。
     """
     
     @keyword
     def create_tunnel(self, step_ip:str, step_username:str, step_password:str, ncs_ip:str, localhost_port):
         """
-        create_tunnelは、OROTI/SSMを経由してNCSへ接続を行うためのSSHポートフォーワードを行います
-        OROTI/SSMの情報はyamlを参照します
+        create_tunnelは、OROTIを経由してNCSへ接続を行うためのSSHポートフォーワードを行います
 
         Args:
             step_ip (str): OROTI/SSMのIPアドレス
@@ -37,7 +36,7 @@ class SshDriver():
     @keyword
     def delete_tunnel(self):
         """
-        delete_tunnelは、OROTI/SSM経由のSSHポートフォワードを終了します
+        delete_tunnelは、OROTIM経由のSSHポートフォワードを終了します
         """
         self.server.close()
     
@@ -45,7 +44,6 @@ class SshDriver():
     def connect_to_ncs(self, ncs_username:str, ncs_password:str):
         """
         connect_to_ncsは、NCS560/5504へSSH接続を行います
-        NCSの接続情報はyamlを参照します
         このメソッドはcreate_tunnelを使用後に使います
 
         Args:
@@ -58,7 +56,7 @@ class SshDriver():
             'username': ncs_username,
             'password': ncs_password,
             'port': self.localhost_port,
-            'session_log': 'netmiko_session.log'
+            'session_log': 'ncs_session.log'
         }
         self.connection = ConnectHandler(**device)
 
@@ -68,15 +66,14 @@ class SshDriver():
         disconnect_to_ncsは、NCS560/5504へのSSH接続を終了します
         """
         self.connection.disconnect()
-    
+
     @keyword
     def get_log(self, command_list:list, wait_time=300) -> str:
         """
-        get_logは、事前ログを取得します
-        事前ログの取得コマンドはyamlファイルを参照します
+        get_logは、与えられたコマンドのログを取得します
 
         Args:
-            command_list (list): 事前ログのコマンド
+            command_list (list): 取得ログのコマンド
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで300秒
             
         Returns:
@@ -207,7 +204,7 @@ class SshDriver():
         return output
 
     @not_keyword
-    def channnel_command(self, command: str, wait_time=1)-> str:
+    def channel_command(self, command: str, wait_time=1)-> str:
         """
         channel_commandは、特殊なモードでコマンド投入を行うためのメソッドです
         Robotファイルからの呼び出しは不可
@@ -233,9 +230,9 @@ class SshDriver():
             rsp_ip (str): RSPの内部IP
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command('admin', wait_time)
-        output = output + self.channnel_command('run', wait_time)
-        output = output + self.channnel_command(f'chvrf 0 ssh {rsp_ip}', wait_time)
+        output = self.channel_command('admin', wait_time)
+        output = output + self.channel_command('run', wait_time)
+        output = output + self.channel_command(f'chvrf 0 ssh {rsp_ip}', wait_time)
         logger.write(output, level='INFO')
 
     @keyword
@@ -246,9 +243,9 @@ class SshDriver():
         Args:
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command('exit', wait_time)
-        output = output + self.channnel_command('exit', wait_time)
-        output = output + self.channnel_command('exit', wait_time)
+        output = self.channel_command('exit', wait_time)
+        output = output + self.channel_command('exit', wait_time)
+        output = output + self.channel_command('exit', wait_time)
         logger.write(output, level='INFO')
 
     @keyword
@@ -260,7 +257,7 @@ class SshDriver():
             address (str): 移動先のアドレス
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command(f'cd {address}', wait_time)
+        output = self.channel_command(f'cd {address}', wait_time)
         logger.write(output, level='INFO')
         
     @keyword
@@ -275,7 +272,7 @@ class SshDriver():
         Returns:
             str: カレントディレクトリのファイル名
         """
-        return self.channnel_command(f'ls {option}', wait_time)
+        return self.channel_command(f'ls {option}', wait_time)
 
     @keyword
     def file_remove(self, file: str, location: str, wait_time=1):
@@ -287,7 +284,7 @@ class SshDriver():
             location (str): 削除対象のモジュール
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command(f'rm {file} location {location}', wait_time)
+        output = self.channel_command(f'rm {file} location {location}', wait_time)
         logger.write(output, level='INFO')
 
     @keyword
@@ -312,7 +309,7 @@ class SshDriver():
         Args:
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command('admin', wait_time)
+        output = self.channel_command('admin', wait_time)
         logger.write(output, level='INFO')
     
     @keyword
@@ -323,7 +320,7 @@ class SshDriver():
         Args:
             wait_time (int, optional):  コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command('exit', wait_time)
+        output = self.channel_command('exit', wait_time)
         logger.write(output, level='INFO')
 
     @keyword
@@ -336,9 +333,9 @@ class SshDriver():
             location (str): RP指定
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで10秒
         """
-        output = self.channnel_command(f'admin delete {filename} location {location}', wait_time)
+        output = self.channel_command(f'admin delete {filename} location {location}', wait_time)
         if '[y|n][y] ?' in output:
-            lines = self.channnel_command('y', wait_time)
+            lines = self.channel_command('y', wait_time)
             output = output + lines
         logger.write(output, level='INFO')
         
@@ -352,9 +349,9 @@ class SshDriver():
             location (str): RP指定
             wait_time (int, optional): コマンド入力から出力を待つ時間、デフォルトで1秒
         """
-        output = self.channnel_command(f'delete {filename} location {location}', wait_time)
+        output = self.channel_command(f'delete {filename} location {location}', wait_time)
         if '[confirm]' in output:
-            lines = self.channnel_command('', wait_time)
+            lines = self.channel_command('', wait_time)
             output = output + lines
         logger.write(output, level='INFO')
 
@@ -375,16 +372,11 @@ class SshDriver():
         """
         output = ''
         if vrf != '':
-            logger.write(f'scp {username}@{host}:{remote_filename} vrf {vrf} {local_filename}', level='INFO')
-            ouptut = self.channnel_command(
+            ouptut = self.channel_command(
                 f'scp {username}@{host}:{remote_filename} vrf {vrf} {local_filename}', 5)
-            # output = self.connection.send_command(
-            #     f'scp {username}@{host}:{remote_filename} {local_filename}', expect_string='Password:')
         else:
-            output = self.channnel_command(
+            output = self.channel_command(
                 f'scp {username}@{host}:{remote_filename} {local_filename}', 5)
-        #     output = self.connection.send_command(
-        #         f'scp {username}@{host}:{remote_filename} {local_filename}', expect_string='Password:')
         output = output + self.connection.send_command_timing(password, read_timeout=wait_time)
         logger.write(output, level='INFO')
 
@@ -527,9 +519,9 @@ class SshDriver():
         return output
 
     @keyword
-    def install_prepare(self, install_id: str, wait_time=3600):
+    def install_prepare_by_id(self, install_id: str, wait_time=3600):
         """
-        install_prepareは、引数のパッケージについてinstall prepareを実施するコマンドです
+        install_prepare_by_idは、引数のidについてinstall prepareを実施するコマンドです
 
         Args:
             install_id (str): 実行id
@@ -539,6 +531,25 @@ class SshDriver():
             AssertionError: 実行終了時に、successfullyの表示がない場合に表示
         """
         lines = self.connection.send_command(f'install prepare id {install_id}  synchronous', read_timeout=wait_time)
+        logger.write(lines, level='INFO')
+        line = lines.splitlines()[-2]
+        if line.split()[-1] != 'successfully':
+            raise AssertionError('install prepareコマンドに失敗しました。')
+
+    @keyword
+    def install_prepare(self, packages: list, wait_time=3600):
+        """
+        install_prepareは、引数のパッケージについてinstall prepareを実施するコマンドです
+
+        Args:
+            packages (list): パッケージ名
+            wait_time (int, optional): 処理の待ち時間を指定します。デフォルトは3600秒
+
+        Raises:
+            AssertionError:  実行終了時に、successfullyの表示がない場合に表示
+        """
+        packages_str = " ".join(packages)
+        lines = self.connection.send_command(f'install prepare id {packages_str}  synchronous', read_timeout=wait_time)
         logger.write(lines, level='INFO')
         line = lines.splitlines()[-2]
         if line.split()[-1] != 'successfully':

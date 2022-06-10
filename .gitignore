@@ -25,7 +25,7 @@ __pycache__/
 TextFSM/
 
 # libdoc
-!libdoc.html
+!libdoc*.html
 
 # .logファイル
 *.log

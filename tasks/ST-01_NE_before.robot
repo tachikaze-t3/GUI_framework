@@ -1,13 +1,16 @@
 *** Settings ***
-Library    SshDriver
+Library           NcsDriver
+Library           ServerDriver
 Suite Setup       Login To Ncs
 Suite Teardown    Logout To Ncs
 
 *** Comments ***
 YAMLで設定が必要なパラメータ
-    ${step_server}[ip]                      :oroti/ssmへssh接続する際のIPアドレス
-    ${step_server}[cli_username]            :oroti/ssmへssh接続する際のユーザー名
-    ${step_server}[cli_password]            :oroti/ssmへssh接続する際のパスワード
+    ${oroti}[vip]                           :orotiにssh接続する際のVIP
+    ${oroti}[username]                      :orotiにssh接続する際のusername
+    ${oroti}[password]                      :orotiにssh接続する際のpassword
+    ${oroti}[node][hostname]                :orotiのhostname一覧
+    ${oroti}[node][ip]                      :orotiの各ノードのIPアドレス
     ${localhost_port}                       :sshポートフォワードに使用する作業端末のポート番号
     ${ncs}[ip]                              :ncsにssh接続する際のIPアドレス
     ${ncs}[username]                        :ncsにssh接続する際のユーザー名
@@ -19,24 +22,27 @@ YAMLで設定が必要なパラメータ
     ${scp_server}[host]                     :scpサーバーのhost名
     ${scp_server}[username]                 :scpダウンロードの際に必要なユーザー名
     ${scp_server}[password]                 :scpダウンロードの際に必要なパスワード
-    ${scp_server}[vrf]                      :scpサーバーに接続するためのvrf(ncs側)
     ${scp_server}[dir]                      :scpサーバーのファイルが保存されているディレクトリアドレス
     @{packages}[ncs560][inactive][exec]     :show install inactiveで表示されるパッケージ名
     @{packages}[ncs560][inactive][admin]    :admin show install inactiveで表示されるパッケージ名
     @{packages}[ncs560][prepare]            :show install prepareで表示されるパッケージ名
-    ${md5}[${filename}]                     :インストーラー(${filename})のチェックサム
+    ${md5}                                  :インストールファイルのチェックサム
 
 *** Variables ***
 
 
 *** Keywords ***
 Login To Ncs
-    [Documentation]    SSHポートフォワードを行い、OROTI/SSM経由でNCSへSSH接続を行います
-    Create Tunnel     ${step_server}[ip]    ${step_server}[cli_username]    ${step_server}[cli_password]    ${ncs}[ip]    ${localhost_port}
-    Connect To Ncs    ${ncs}[username]      ${ncs}[password]
-    @{command}    Create List    show running-config | include hostname
-    ${output}    Get Log    ${command}
-    Should Contain    ${output}    ${ncs}[hostname]
+    [Documentation]    SSHポートフォワードを行い、OROTI経由でNCSへSSH接続を行います
+    Connect To Server        ${oroti}[vip]             ${oroti}[username]    ${oroti}[password]
+    ${secondary_hostname}    Get Secondary Hostname    ${oroti}[node][hostname]
+    Disconnect To Server
+    Create Tunnel            ${oroti}[node][ip][${secondary_hostname}]       ${oroti}[username]
+    ...                      ${oroti}[password]    ${ncs}[ip]    ${localhost_port}
+    Connect To Ncs           ${ncs}[username]          ${ncs}[password]
+    @{command}               Create List               show running-config | include hostname
+    ${output}                Get Log                   ${command}
+    Should Contain           ${output}                 ${ncs}[hostname]
 
 Logout To Ncs
     [Documentation]    NCSとのSSH接続を終了し、SSHポートフォワードを終了します
@@ -124,20 +130,22 @@ UT1-06
 
 UT1-07
     [Documentation]    7.0.1用miniファイルの削除
-    Admin Dir    harddisk:/tftpboot    all
+    Admin Dir       harddisk:/tftpboot                        all
     Admin Delete    harddisk:/tftpboot/ncs560-mini-x-7.0.1    all
-    ${output}    Admin Dir    harddisk:/tftpboot    all
+    ${output}       Admin Dir                                 harddisk:/tftpboot    all
     FOR    ${node}    IN    @{output}
         Should Not Contain    ${node}[files]    ncs560-mini-x-7.0.1
     END
 
 UT1-08
-    [Documentation]    OS/SMU 配信 (SCP) 
-    ${filename}     Set Variable             ${scp_server}[dir]ncs560-7.0.2.CSCvz20685.tar
-    Scp Download    ${ncs}[installer_dir]    ${filename}    ${scp_server}[host]    ${scp_server}[username]    ${scp_server}[password]    ${scp_server}[vrf]
+    [Documentation]    OS/SMU 配信 (SCP)
+    [Setup]        Connect To Server    ${scp_server}[host]      ${scp_server}[username]    ${scp_server}[password]
+    [Teardown]     Disconnect To Server
+    ${filename}    Set Variable         ${scp_server}[dir]ncs560-7.0.2.CSCvz20685.tar
+    Scp Upload     ${filename}          ${ncs}[installer_dir]    ${ncs}[ip]                 ${ncs}[username]    ${ncs}[password]
     FOR    ${package}    IN    @{packages}[ncs560][filename]
         ${filename}     Set Variable             ${scp_server}[dir]${package}
-        Scp Download    ${ncs}[installer_dir]    ${filename}    ${scp_server}[host]    ${scp_server}[username]    ${scp_server}[password]    ${scp_server}[vrf]
+        Scp Upload    ${filename}    ${ncs}[installer_dir]    host${ncs}[ip]    ${ncs}[username]    ${ncs}[password]
     END
 
 UT1-09
@@ -184,7 +192,9 @@ UT1-14
 
 UT1-15
     [Documentation]    アクティブ化前のチェック
-    Install Prepare                   ${install_id}
-    ${output}                         Show Install Prepare
+    [Tags]    動作未確認
+    @{prepare_packages}    Create List    @{packages}[ncs560][inactive][exec]    @{packages}[ncs560][inactive][exec]	
+    Install Prepare        ${prepare_packages}
+    ${output}              Show Install Prepare
     List Containts Should Be Equal    ${packages}[ncs560][prepare]    ${output}
 

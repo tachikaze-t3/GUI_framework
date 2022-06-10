@@ -1,10 +1,15 @@
-# OROTI(CLI)の接続情報
+# OROTIの接続情報
 oroti:
-  ip: 
-  cli_username: 
-  cli_password: 
-  gui_username: 
-  gui_password: 
+  username: 
+  password: 
+  vip: 
+  node:
+    hostname:
+      [
+
+      ]
+    ip:
+
 
 # NCSの接続情報
 ncs:
@@ -12,6 +17,7 @@ ncs:
   username: 
   password: 
   installer_dir: 
+  platform:
 
 # SSHポートフォワードで使用するポート番号
 localhost_port: 
@@ -21,7 +27,6 @@ scp_server:
   host: 
   username: 
   password: 
-  vrf: 
   dir: 
 
 # 事前ログ
@@ -52,3 +57,7 @@ packages:
         [
           
         ]
+    prepare:
+
+# md5(packages:ncs{560/5504}:filenameに記載したファイルについて記載する)
+md5:
