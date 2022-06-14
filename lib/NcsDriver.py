@@ -41,7 +41,7 @@ class NcsDriver():
         self.server.close()
     
     @keyword
-    def connect_to_ncs(self, ncs_username:str, ncs_password:str):
+    def connect_to_ncs(self, ncs_username:str, ncs_password:str, logfile='ncs_session.log'):
         """
         connect_to_ncsは、NCS560/5504へSSH接続を行います
         このメソッドはcreate_tunnelを使用後に使います
@@ -49,6 +49,7 @@ class NcsDriver():
         Args:
             ncs_username (str): NCSへSSH接続する際のusername
             ncs_password (str): NCSへSSH接続する際のpassword
+            logfile(str): セッションログのファイル名、デフォルトはncs_session.log
         """
         device = {
             'device_type': 'cisco_xr',
@@ -56,7 +57,8 @@ class NcsDriver():
             'username': ncs_username,
             'password': ncs_password,
             'port': self.localhost_port,
-            'session_log': 'ncs_session.log'
+            'session_log': logfile,
+            'timeout': 1
         }
         self.connection = ConnectHandler(**device)
 
@@ -530,7 +532,7 @@ class NcsDriver():
         Raises:
             AssertionError: 実行終了時に、successfullyの表示がない場合に表示
         """
-        lines = self.connection.send_command(f'install prepare id {install_id}  synchronous', read_timeout=wait_time)
+        lines = self.connection.send_command(f'install prepare id {install_id} synchronous', read_timeout=wait_time)
         logger.write(lines, level='INFO')
         line = lines.splitlines()[-2]
         if line.split()[-1] != 'successfully':
@@ -548,12 +550,13 @@ class NcsDriver():
         Raises:
             AssertionError:  実行終了時に、successfullyの表示がない場合に表示
         """
-        packages_str = " ".join(packages)
-        lines = self.connection.send_command(f'install prepare id {packages_str}  synchronous', read_timeout=wait_time)
+        lines = ''
+        for package in packages:
+            lines = lines + self.connection.send_command(f'install prepare {package} synchronous', read_timeout=wait_time)
+            line = lines.splitlines()[-2]
+            if line.split()[-1] != 'successfully':
+                raise AssertionError('install prepareコマンドに失敗しました。')
         logger.write(lines, level='INFO')
-        line = lines.splitlines()[-2]
-        if line.split()[-1] != 'successfully':
-            raise AssertionError('install prepareコマンドに失敗しました。')
 
     @keyword
     def show_install_prepare(self) -> list:

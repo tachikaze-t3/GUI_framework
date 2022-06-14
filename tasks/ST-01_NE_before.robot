@@ -39,7 +39,7 @@ Login To Ncs
     Disconnect To Server
     Create Tunnel            ${oroti}[node][ip][${secondary_hostname}]       ${oroti}[username]
     ...                      ${oroti}[password]    ${ncs}[ip]    ${localhost_port}
-    Connect To Ncs           ${ncs}[username]          ${ncs}[password]
+    Connect To Ncs           ${ncs}[username]          ${ncs}[password]      ncs_session-1.log
     @{command}               Create List               show running-config | include hostname
     ${output}                Get Log                   ${command}
     Should Contain           ${output}                 ${ncs}[hostname]
@@ -50,7 +50,6 @@ Logout To Ncs
     Delete Tunnel
 
 *** Tasks ***
-
 UT1-00
     [Documentation]    事前ログ取得
     Get Log                     ${before_log}
@@ -141,12 +140,14 @@ UT1-08
     [Documentation]    OS/SMU 配信 (SCP)
     [Setup]        Connect To Server    ${scp_server}[host]      ${scp_server}[username]    ${scp_server}[password]
     [Teardown]     Disconnect To Server
+    Disconnect To Ncs
     ${filename}    Set Variable         ${scp_server}[dir]ncs560-7.0.2.CSCvz20685.tar
     Scp Upload     ${filename}          ${ncs}[installer_dir]    ${ncs}[ip]                 ${ncs}[username]    ${ncs}[password]
     FOR    ${package}    IN    @{packages}[ncs560][filename]
         ${filename}     Set Variable             ${scp_server}[dir]${package}
-        Scp Upload    ${filename}    ${ncs}[installer_dir]    host${ncs}[ip]    ${ncs}[username]    ${ncs}[password]
+        Scp Upload    ${filename}    ${ncs}[installer_dir]    ${ncs}[ip]    ${ncs}[username]    ${ncs}[password]
     END
+    Connect To Ncs    ${ncs}[username]          ${ncs}[password]    ncs_session-2.log
 
 UT1-09
     [Documentation]    OS/SUM 配信確認
@@ -192,9 +193,6 @@ UT1-14
 
 UT1-15
     [Documentation]    アクティブ化前のチェック
-    [Tags]    動作未確認
-    @{prepare_packages}    Create List    @{packages}[ncs560][inactive][exec]    @{packages}[ncs560][inactive][exec]	
-    Install Prepare        ${prepare_packages}
-    ${output}              Show Install Prepare
+    Install Prepare    ${packages}[ncs560][prepare]
+    ${output}                Show Install Prepare
     List Containts Should Be Equal    ${packages}[ncs560][prepare]    ${output}
-
