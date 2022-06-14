@@ -14,7 +14,7 @@ class NcsDriver():
     @keyword
     def create_tunnel(self, step_ip:str, step_username:str, step_password:str, ncs_ip:str, localhost_port):
         """
-        create_tunnelは、OROTIを経由してNCSへ接続を行うためのSSHポートフォーワードを行います
+        create_tunnelは、OROTIを経由してNCSへ接続を行うためのSSHポートフォワードを行います
 
         Args:
             step_ip (str): OROTI/SSMのIPアドレス
