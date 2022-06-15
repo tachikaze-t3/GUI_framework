@@ -521,9 +521,9 @@ class NcsDriver():
         return output
 
     @keyword
-    def install_prepare_by_id(self, install_id: str, wait_time=3600):
+    def install_prepare(self, install_id: str, wait_time=3600):
         """
-        install_prepare_by_idは、引数のidについてinstall prepareを実施するコマンドです
+        install_prepareは、引数のidについてinstall prepareを実施するコマンドです
 
         Args:
             install_id (str): 実行id
@@ -537,26 +537,6 @@ class NcsDriver():
         line = lines.splitlines()[-2]
         if line.split()[-1] != 'successfully':
             raise AssertionError('install prepareコマンドに失敗しました。')
-
-    @keyword
-    def install_prepare(self, packages: list, wait_time=3600):
-        """
-        install_prepareは、引数のパッケージについてinstall prepareを実施するコマンドです
-
-        Args:
-            packages (list): パッケージ名
-            wait_time (int, optional): 処理の待ち時間を指定します。デフォルトは3600秒
-
-        Raises:
-            AssertionError:  実行終了時に、successfullyの表示がない場合に表示
-        """
-        lines = ''
-        for package in packages:
-            lines = lines + self.connection.send_command(f'install prepare {package} synchronous', read_timeout=wait_time)
-            line = lines.splitlines()[-2]
-            if line.split()[-1] != 'successfully':
-                raise AssertionError('install prepareコマンドに失敗しました。')
-        logger.write(lines, level='INFO')
 
     @keyword
     def show_install_prepare(self) -> list:
