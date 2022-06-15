@@ -192,8 +192,7 @@ UT1-14
     List Containts Should Be Equal    ${admin_output}[1][Packages]    ${packages}[ncs560][inactive][admin]
 
 UT1-15
-    [Documentation]    アクティブ化前のチェック
-    @{prepare_packages}                Create List                    @{packages}[ncs560][inactive][exec]    @{packages}[ncs560][inactive][exec]	
-    Install Prepare                   ${prepare_packages}
+    [Documentation]    install prepareの実施と確認
+    Install Prepare                   ${install_id}
     ${output}                         Show Install Prepare
     List Containts Should Be Equal    ${packages}[ncs560][prepare]    ${output}
