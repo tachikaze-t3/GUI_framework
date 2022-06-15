@@ -61,3 +61,7 @@ packages:
 
 # md5(packages:ncs{560/5504}:filenameに記載したファイルについて記載する)
 md5:
+
+# install prepareのID
+# ST01のUT1-13を動作させずにUT1-15を利用する際に設定する
+install_id:
