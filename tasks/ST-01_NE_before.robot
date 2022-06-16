@@ -5,6 +5,8 @@ Suite Setup       Login To Ncs
 Suite Teardown    Logout To Ncs
 
 *** Comments ***
+本ファイルは事前作業を実施するためのrobotファイル
+
 YAMLで設定が必要なパラメータ
     ${oroti}[vip]                           :orotiにssh接続する際のVIP
     ${oroti}[username]                      :orotiにssh接続する際のusername
@@ -27,6 +29,7 @@ YAMLで設定が必要なパラメータ
     @{packages}[ncs560][inactive][admin]    :admin show install inactiveで表示されるパッケージ名
     @{packages}[ncs560][prepare]            :show install prepareで表示されるパッケージ名
     ${md5}                                  :インストールファイルのチェックサム
+    ${install_id}                           :途中実行の際にinstall prepareで使用するinstall id
 
 *** Variables ***
 
