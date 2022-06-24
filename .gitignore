@@ -29,3 +29,6 @@ TextFSM/
 
 # .logファイル
 *.log
+
+# 開発メモ
+開発メモ.txt

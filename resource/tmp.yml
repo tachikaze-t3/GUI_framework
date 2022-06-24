@@ -58,6 +58,24 @@ packages:
           
         ]
     prepare:
+    active_1:
+      ecec:
+        [
+
+        ]
+      admin:
+        [
+
+        ]
+    active_2:
+      ecec:
+        [
+
+        ]
+      admin:
+        [
+          
+        ]
 
 # md5(packages:ncs{560/5504}:filenameに記載したファイルについて記載する)
 md5:

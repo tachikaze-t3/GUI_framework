@@ -564,7 +564,7 @@ class NcsDriver():
     @keyword
     def show_platform(self) -> list:
         """
-        show_platform
+        show_platformは、show platformを取得します
 
         Returns:
             list: Node,Type,State,Config Stateを持ったdict型
@@ -624,3 +624,216 @@ class NcsDriver():
                     flag = True
             if flag == False:
                 raise AttributeError('2つのlistは同一ではありません。')
+
+    @keyword
+    def install_activate(self):
+        """
+        install_activateは、install activateコマンドを投入します
+        """
+        self.channel_command('install activate synchronous')
+        # yes入力
+
+    @keyword
+    def show_install_active(self) -> list:
+        """
+        show_install_activeは、show install activateを取得しパースします
+
+        Returns:
+            list: NodeとPackagesを持つdict
+        """
+        lines = self.connection.send_command('show install active')
+        logger.write(lines, level='INFO')
+        lines = lines.splitlines()
+        output = []
+        for line in lines:
+            if 'Node' in line:
+                d = {
+                    'Node': line.split(" ")[1],
+                    'Packages': []
+                }
+                output.append(d)
+            elif '       ' in line:
+                package = line.strip().split()[0]
+                output[-1]['Packages'].append(package)
+        return output
+
+    @keyword
+    def admin_show_install_active(self) -> list:
+        """
+        admin_show_install_activeは、admin show install activateを取得しパースします
+
+        Returns:
+            list: NodeとPackagesを持つdict
+        """
+        lines = self.connection.send_command('admin show install active')
+        logger.write(lines, level='INFO')
+        lines = lines.splitlines()
+        output = []
+        for line in lines:
+            if 'Node' in line:
+                d = {
+                    'Node': line.split()[2],
+                    'Packages': []
+                }
+                output.append(d)
+            elif '       ' in line:
+                package = line.strip().split()[0]
+                output[-1]['Packages'].append(package)
+        return output
+
+    @keyword
+    def show_version(self) -> str:
+        """
+        show_versionは、show versionを取得しバージョン数を返します
+
+        Returns:
+            str: バージョン
+        """
+        lines = self.connection.send_command('show version')
+        logger.write(lines, level='INFO')
+        lines = lines.splitlines()
+        return lines[2].split()[-1]
+
+    @keyword
+    def install_commit(self):
+        """
+        install_commitは、install commitを実施します
+
+        Raises:
+            AssertionError: 実行終了時に、successfullyの表示がない場合に表示
+        """
+        lines = self.connection.send_command('install commit synchronous')
+        logger.write(lines, level='INFO')
+        line = lines.splitlines()[-2]
+        if line.split()[-1] != 'successfully':
+            raise AssertionError('install commitコマンドに失敗しました。')
+
+    @keyword
+    def show_install_committed(self) -> list:
+        """
+        show_install_committedは、show install committedを取得しパースします
+
+        Returns:
+            list: NodeとPackagesを持つdict
+        """
+        lines = self.connection.send_command('show install committed')
+        logger.write(lines, level='INFO')
+        lines = lines.splitlines()
+        output = []
+        for line in lines:
+            if 'Node' in line:
+                d = {
+                    'Node': line.split(" ")[1],
+                    'Packages': []
+                }
+                output.append(d)
+            elif '       ' in line:
+                package = line.strip().split(" ")[0]
+                output[-1]['Packages'].append(package)
+        return output
+
+    @keyword
+    def admin_show_install_committed(self) -> list:
+        """
+        admin_show_install_committedは、admin show install committedを取得しパースします
+
+        Returns:
+            list: NodeとPackagesを持つdict
+        """
+        lines = self.connection.send_command('admin show install committed')
+        logger.write(lines, level='INFO')
+        lines = lines.splitlines()
+        output = []
+        for line in lines:
+            if 'Node' in line:
+                d = {
+                    'Node': line.split()[2],
+                    'Packages': []
+                }
+                output.append(d)
+            elif '       ' in line:
+                package = line.strip().split()[0]
+                output[-1]['Packages'].append(package)
+        return output
+
+    @keyword
+    def install_deactivate(self, packages: list):
+        """
+        install_deactivateは、入力されたパッケージ名についてinstall deactivateを実施します
+
+        Args:
+            packages (list): パッケージ名
+
+        Raises:
+            AssertionError: 実行終了時に、successfullyの表示がない場合に表示
+        """
+        packages_str = ' '.join(packages)
+        lines = self.connection.send_command(f'install deactivate {packages_str} synchronous')
+        logger.write(lines, level='INFO')
+        line = lines.splitlines()[-2]
+        if line.split()[-1] != 'successfully':
+            raise AssertionError('install deactivateコマンドに失敗しました。')
+
+    @keyword
+    def show_hw_module_fpd(self):
+        lines = self.connection.send_command('show hw-module fpd')
+        logger.write(lines, level='INFO')
+        lines = lines.splitlines()[6:]
+        output = []
+        for line in lines:
+            record = {
+                "Location": line[:11].strip(),
+                "Card type": line[11:33].strip(),
+                "FPD device": line[39:60].strip(),
+                "ATR Status": line[60:69].strip(),
+                "Running": line[69:77].strip(),
+                "Programd": line[77:].strip()
+            }
+            output.append(record)
+        return output
+
+    @keyword
+    def ncs_reload(self):
+        """
+        ncs_reloadは、ルータをリロードします
+        """
+        lines = self.channel_command('admin hw-module location all reload', 15)
+        lines = lines + self.channel_command('yes')
+        logger.write(lines, level='INFO')
+
+    @keyword
+    def fpd_Should_be_UT2(self, output: list):
+        flag = True
+        for state in output:
+            if state['Card type'] == 'N560-IMA2C' or state['Card type'] == 'A900-IMA8Z':
+                if state['ATR Status'] == 'RLOAD REQ' or state['ATR Status'] == 'CURRENT':
+                    continue
+                else:
+                    flag = False
+                    break
+            if state['FPD device'] == 'PRIMARY-BIOS':
+                if state['ATR Status'] != 'CURRENT':
+                    flag = False
+                    break
+        if flag == False:
+            raise AssertionError('fpdの状態が想定と違います。')
+
+    @keyword
+    def fpd_Should_be_UT3(self, output: list):
+        flag = True
+        for state in output:
+            if state['Card type'] == 'N560-IMA2C':
+                if state['ATR Status'] != 'CURRENT' or state['Running'] != 5.07 or state['Programd'] != 5.07:
+                    flag = False
+                    break
+            if state['Card type'] == 'A900-IMA8Z':
+                if state['ATR Status'] != 'CURRENT' or state['Running'] != 17.05 or state['Programd'] != 17.05:
+                    flag = False
+                    break
+            if state['FPD device'] == 'PRIMARY-BIOS':
+                if state['ATR Status'] != 'CURRENT' or state['Running'] != 0.21 or state['Programd'] != 0.21:
+                    flag = False
+                    break
+        if flag == False:
+            raise AssertionError('fpdの状態が想定と違います。')
+        

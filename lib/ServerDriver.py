@@ -94,3 +94,18 @@ class ServerDriver():
         output = output + self.connection.send_command_timing(password, read_timeout=wait_time)
         logger.write(output, level='INFO')
 
+    @keyword
+    def file_check(self, address='') -> str:
+        """
+        file_checkは、指定したアドレスのファイルを取得します
+        (ファイル名はカラーコードも含めて取得します)
+
+        Args:
+            address (str, optional): 確認するアドレス。デフォルトは入力なし
+
+        Returns:
+            str: lsコマンドの出力結果
+        """
+        output = self.connection.send_command_timing(f'ls -l {address}')
+        logger.write(output, level='INFO')
+        return output

@@ -25,6 +25,7 @@ YAMLで設定が必要なパラメータ
     ${scp_server}[username]                 :scpダウンロードの際に必要なユーザー名
     ${scp_server}[password]                 :scpダウンロードの際に必要なパスワード
     ${scp_server}[dir]                      :scpサーバーのファイルが保存されているディレクトリアドレス
+    @{packages}[ncs560][filename]           :7.3.2のOS/SUMファイル
     @{packages}[ncs560][inactive][exec]     :show install inactiveで表示されるパッケージ名
     @{packages}[ncs560][inactive][admin]    :admin show install inactiveで表示されるパッケージ名
     @{packages}[ncs560][prepare]            :show install prepareで表示されるパッケージ名
@@ -120,19 +121,20 @@ UT1-05
     END
 
 UT1-06
-    [Documentation]    XR VM、Sysadmin VMのinactive packageの確認
-    @{admin_packages}    Create List    ncs560-sysadmin-hostos-7.0.2-r702.admin    ncs560-sysadmin-hostos-7.0.2-r702.host
-    ${exec_output}       Show Install Inactive
-    ${admin_output}      Admin Show Install Inactive
-    Should Be Empty      ${exec_output}
+    [Documentation]    XR VM、Sysadmin VMのinactive packageの削除と確認
+    @{packages}                Create List    all
+    Install Remove Inactive    ${packages}
+    @{admin_packages}          Create List    ncs560-sysadmin-hostos-7.0.2-r702.admin    ncs560-sysadmin-hostos-7.0.2-r702.host
+    ${exec_output}             Show Install Inactive
+    ${admin_output}            Admin Show Install Inactive
+    Should Be Empty            ${exec_output}
     FOR    ${package}    IN    @{admin_packages}
         Should Contain    ${admin_output}[0][Packages]    ${package}
         Should Contain    ${admin_output}[1][Packages]    ${package}
     END
 
 UT1-07
-    [Documentation]    7.0.1用miniファイルの削除
-    Admin Dir       harddisk:/tftpboot                        all
+    [Documentation]    7.0.1用miniファイルの削除と確認
     Admin Delete    harddisk:/tftpboot/ncs560-mini-x-7.0.1    all
     ${output}       Admin Dir                                 harddisk:/tftpboot    all
     FOR    ${node}    IN    @{output}
@@ -144,6 +146,10 @@ UT1-08
     [Setup]        Connect To Server    ${scp_server}[host]      ${scp_server}[username]    ${scp_server}[password]
     [Teardown]     Disconnect To Server
     Disconnect To Ncs
+    ${output}      File Check           /home/admin/update_work
+    FOR    ${filename}    IN    @{packages}[ncs560][filename]
+        Should Contain    ${output}    ${filename}
+    END
     ${filename}    Set Variable         ${scp_server}[dir]ncs560-7.0.2.CSCvz20685.tar
     Scp Upload     ${filename}          ${ncs}[installer_dir]    ${ncs}[ip]                 ${ncs}[username]    ${ncs}[password]
     FOR    ${package}    IN    @{packages}[ncs560][filename]
