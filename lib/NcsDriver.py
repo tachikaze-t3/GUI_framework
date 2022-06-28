@@ -58,7 +58,6 @@ class NcsDriver():
             'password': ncs_password,
             'port': self.localhost_port,
             'session_log': logfile,
-            'timeout': 1
         }
         self.connection = ConnectHandler(**device)
 
